@@ -91,23 +91,30 @@ jobs:
             unzip clang.zip -d clang-aosp/
         fi
 
-    - name: 下载Gcc-aosp编译器
-      if: env.METHOD_OK == 'A'
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace
-        if [ ${{ env.METHOD_OK }} = A ]; then
-            mkdir gcc-64
-            wget -O gcc-aarch64.tar.gz https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz
-            tar -C gcc-64/ -zxvf gcc-aarch64.tar.gz
-            echo "GCC_64=CROSS_COMPILE=$GITHUB_WORKSPACE/kernel_workspace/gcc-64/bin/aarch64-linux-android-" >> $GITHUB_ENV
-        fi
+    # - name: 下载Gcc-aosp编译器
+    #   if: env.METHOD_OK == 'A'
+    #   run: |
+    #     cd $GITHUB_WORKSPACE/kernel_workspace
+    #     if [ ${{ env.METHOD_OK }} = A ]; then
+    #         mkdir gcc-64
+    #         wget -O gcc-aarch64.tar.gz https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz
+    #         tar -C gcc-64/ -zxvf gcc-aarch64.tar.gz
+    #         echo "GCC_64=CROSS_COMPILE=$GITHUB_WORKSPACE/kernel_workspace/gcc-64/bin/aarch64-linux-android-" >> $GITHUB_ENV
+    #     fi
 
-        if [ ${{ env.METHOD_OK }} = A ]; then
-            mkdir gcc-32
-            wget -O gcc-arm.tar.gz https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz
-            tar -C gcc-32/ -zxvf gcc-arm.tar.gz
-            echo "GCC_32=CROSS_COMPILE_ARM32=$GITHUB_WORKSPACE/kernel_workspace/gcc-32/bin/arm-linux-androideabi-" >> $GITHUB_ENV
-        fi
+    #     if [ ${{ env.METHOD_OK }} = A ]; then
+    #         mkdir gcc-32
+    #         wget -O gcc-arm.tar.gz https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/+archive/refs/tags/android-12.1.0_r27.tar.gz
+    #         tar -C gcc-32/ -zxvf gcc-arm.tar.gz
+    #         echo "GCC_32=CROSS_COMPILE_ARM32=$GITHUB_WORKSPACE/kernel_workspace/gcc-32/bin/arm-linux-androideabi-" >> $GITHUB_ENV
+    #     fi
+
+    - name: 下载GIS
+      run: |
+        git clone --recursive --branch master https://android.googlesource.com/platform/prebuilts/gas/linux-x86 gas --depth=1
+        echo "$(pwd)/gas/" >> $GITHUB_PATH
+        echo "$(pwd)/gas/bin" >> $GITHUB_PATH
+        echo "PATH Variable: $PATH"
 
     - name: 下载mkbootimg解包工具
       if: env.BUILD_BOOT_IMG == 'true'
@@ -218,6 +225,7 @@ jobs:
 
     - name: 开始编译内核
       run: |
+        echo "PATH Variable: $PATH"
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang-aosp/bin:$PATH
         export KBUILD_BUILD_HOST=Github-Action
